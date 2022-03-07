@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1-1.회원목록 map filter</title>
+</head>
+<body>
+<script>
+    const users = [
+        {id:1, name:'Moira', age:48},
+        {id:2, name:'Siebren', age:62},
+        {id:3, name:'Din', age:38},
+        {id:4, name:'Luke', age:28},
+        {id:5, name:'Leia', age:29},
+        {id:6, name:'Han', age:33},
+        {id:7, name:'Grogu', age:50},
+        {id:8, name:'Anakain', age:52},
+    ];
+
+    /****
+     *  01.명령형 코드 
+     * 1. 30세 이상인 users를 거른다
+     * 2. 30세 이상인 users의 name을 수집한다.
+     * 3. 30세 미만인 users를 거른다.
+     * 4. 30세 미만인 users의 age를 수집한다
+     * */
+    {
+        const temp_over_30 = [];
+        for(let user of users){if(user.age >= 30){temp_over_30.push(user);}}
+        for(let user of temp_over_30){console.log('30세 이상 : ',user.name);}
+
+        const temp_under_30 = [];
+        for(let user of users){if(user.age < 30){temp_under_30.push(user);}}
+        for(let user of temp_under_30){console.log('응애 : ', user.age)}
+    }
+        
+
+    /* 02. _filter, _map 으로 리팩토링 */
+    {
+        //응용형 함수 //고차함수
+        function _filter(users, predi){
+            const result = [];
+            for(let user of users){
+                if(predi(user)){result.push(user);}
+            }
+            return result;
+        }//_filter
+
+        const over_30 = _filter(users, function(user){return user.age >= 30;}); 
+        console.log('30세 이상',over_30);
+
+        const under_30 = _filter(users, function(user){return user.age < 30;}); 
+        console.log('20대만',under_30);
+
+        //ES6는 일케도 된다고
+        console.log('ES6 찬양하라 : filter 내장 함수',users.filter(user => user.age >= 50));
+
+        // _filter 함수는 현재 다형성이 높아서 걍 이런것에도 쓸 수 있는거야.
+        console.log('홀수', _filter([1,2,3,4], function(num){return num % 2 }))
+        console.log('짝수', _filter([1,2,3,4], function(num){return !(num % 2) }))
+
+        //이번엔 이름과 나이를 수집하는걸 map 짭으로 만들어보자
+        //함수만 봐선 데이터형이 어떻게 생겼는지 하나두 모르겠쥬? ㅋㅋ 다형성이 높기 때문이쥬
+        function _map(users, mapper){
+            const result = [];
+            for(let user of users){
+                result.push(mapper(user));
+            }
+            return result;
+        }//_map
+
+        const name_over30 = _map(over_30,function(user){return user.name})
+        console.log(name_over30);
+
+        const age_under30 = _map(under_30,function(user){return user.age})
+        console.log(age_under30);
+        
+        //역시 다형성이 높아서 걍 아무데나 갖다 쓸 수 있죠
+        console.log(_map([1,2,3,4], function(num){ return num * 10 }))
+
+        //자 위에 filter랑 map은 합쳐서 이렇게 쓸 수 있음
+        const result_over_30 = _map(
+            _filter(users, function(user){return user.age >= 30;}),
+            function(user){return user.name}
+        );
+        console.log(result_over_30);
+
+        //ES6에선 이렇게지
+        console.log('사랑해요 ES6',users.filter(user => user.age >= 50).map(user => user.name));
+
+        //근데 아직 _map _filter에 여전히 중복이 남아있어 그게 뭐냐?
+        //for문 도는거 ㅇㅇ 그걸 이제 each로 중복 제거 finally 할 것임
+    }
+
+    /* 03. each 만들기 */
+    //1. _each로 _map,_filter 중복 제거
+    //2. 외부 다형성
+        //1. array_like, arguments, document.querySelectorAll
+</script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1-4 커링 curry curryr</title>
+</head>
+<body>
+<pre>
+    커링이란 : 함수와 인자를 다루는 기법
+    js 자체에선 커링을 지원하지 않지만 : 일급함수를 지원하고, 평가시점을 마음대로 할 수 있기 때문에 커링과 같은 기법을 구현 가능하다
+    인자를 받을때까지 다 받고 미루었다가 최종적으로 함수를 실행하는 기법이지.
+</pre>
+<!--  -->
+<script>
+    /* [커링] */
+    //1. _curry, _curryr
+    function _curry(fn){
+        return function(a){
+            return function(b){
+                return fn(a,b);
+            }//
+        }//
+    }//_curry
+
+    function add_normal(a,b){return a + b;}
+    console.log(add_normal(5,10)); //15
+
+    const add = _curry(function(a,b){ return a + b });
+    const add_10 = add(10);
+    const add_20 = add_10(20);
+    console.log(add_20); //30
+
+    //그치만 저 지랄하려고 커링을 쓰는게 아니지용ㅋㅋ
+    console.log(add(1)(2)); //3
+    console.log(add(100)(200)); //300
+
+    /* 만일 인자가 2개 들어오면 걍 바로 더하기 실행하게 */
+    function _curry2(fn){
+        return function(a,m){
+            return arguments.length == 2 ? fn(a,m) : function(b){return fn(a,b)}
+        }
+    }//_curry2
+
+    const add_2  = _curry2(function(a,b){return a + b;});
+    console.log(add_2(200,300)); //500
+    console.log(add_2(200)(300)); //500
+
+
+    const substract = _curry(function(a,b){return a - b;});
+    console.log(substract(10)(5));
+
+    //그치만 인간이 이해하기에 이상한 일이 발쌩해용
+    const sub10 = substract(10);
+    console.log(sub10(8)); //2
+    //10-8 인지 8-10인지 콘솔 보기전엔 직관적으로 와닿지 않아잉
+    // 그래서 _curryr(커리 라이트)라는 함수를 만들어줄것임 12:04
+
+    function _curryr(fn){
+        return function(a,b){
+            return arguments.length == 2 ? fn(a,b) : function(b){return fn(b, a);}
+        }
+    }//_curryr
+
+    const sub2 = _curryr(function(a,b){return a - b;})
+    console.log(sub2(10,5)); //5
+    console.log(sub2(5)(3)); //-2
+    const sub2_10 = sub2(10);
+    console.log(sub2_10(3)); //-7
+
+    
+    /* [ _get 만들어 좀 더 간단하게 하기] */
+    function _get(obj,key){
+        return !obj ? undefined : obj[key];
+    }
+
+    console.log(_get(undefined,"name"));
+    console.log(_get({name:"Moira"},"name"));
+
+    //걍 object.key 해서 보면 되지 왜 이지럴을 해야하죠
+    //optional chaining(?.)이 없던 시절에는 그렇게 부르면 에러가 났거든ㅋㅋ
+    //근데 _get으로 하면 걍 undefined만 떠서 그래.
+
+    //커링으로 get 만들기
+    const _getR = _curryr(function(obj,key){
+        return !obj ? undefined : obj[key];
+    });
+
+    console.log(_getR("name")({name : "Din Djarin"}))
+
+    const get_name = _getR('name');
+    console.log(get_name({name:'Grogu', age:50}));
+
+    /* 최종 간단 쌉가능 */
+    const users = [
+        {id:1, name : "aaa" , age : 30},
+        {id:2, name : "bbb" , age : 20},
+        {id:3, name : "ccc" , age : 50},
+    ];
+
+    function _filter(list,predi){
+        const result = [];
+        _each(list, function(val){
+            if(predi(val)){result.push(val)}
+        })
+        return result;
+    }//_filter
+    
+    function _map(list,mapper){
+        const result = [];
+        _each(list,function(val){
+            result.push(mapper(val));
+        });
+        return result;
+    }//_map
+
+    function _each(list,iter){
+        for(let i=0; i<list.length; i++){ iter(list[i]); }
+        return list;
+    }//_each
+
+    console.log(
+        _map(
+            _filter(users, function(user){ return user.age >= 30;}),
+            _getR('name')
+        )
+    );
+
+    console.log(
+        _map(
+            _filter(users, function(user){ return user.age < 30;}),
+            _getR('age')
+        )
+    );
+</script>
+</body>
+</html>

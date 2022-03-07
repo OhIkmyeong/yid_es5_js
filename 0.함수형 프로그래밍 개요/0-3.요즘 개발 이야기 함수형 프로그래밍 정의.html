@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>0-3.요즘 개발 이야기 함수형 프로그래밍 정의</title>
+</head>
+<body>
+<pre>
+    요즘 개발 이야기
+
+    재미 / 실시간성 : 라이브 방송, 실시간 댓글, 협업, 메신저
+    독창성 / 완성도 : 애니메이션, 무한 스크롤, 벽돌(masonry)
+    더 많아져야 하는 동시성 : 비동기 I/O, CSP, Actor, STM...
+    더 빨라져야하는 반응성 / 고가용성 : ELB, Auto Scaling, OTP Supervisor
+    대용량 / 정확성 / 병렬성 : MapReduce, Clojure Reducers... 
+    복잡도 / MSA / ... : 많아지고 세밀해지는 도구들
+
+    그치만 타협할 수 없는 생산성~!
+
+    스멀스멀 다가오는 FP (함수형 프로그래밍)
+    - 좋아지는 하드웨어 성능
+    - 좋아지는 컴파일러
+    - 함수형 프로그래밍 기술
+    - 좋아지는 분산 / 리액티브 환경
+    - 동시성 + 병렬성 관련 기술
+    - 성공적인 적용 사례와 영향
+</pre>
+<pre>
+함수형 프로그래밍은 애플리케이션, 함수의 구성요소, 더 나아가서 언어 자체를 함수처럼 여기도록 만들고, 이러한 함수 개념을 가장 우선순위에 놓는다.
+함수형 사고방식은 문제의 해결방법을 동사(함수)들로 구성(조합)하는 것
+
+-마이클 포커스(클로저 프로그래밍의 즐거움) 에서...
+</pre>
+
+<script>
+    //객체가 먼저나오냐 함수가 먼저나오냐의 차이
+    
+    /* 데이터(객체) 기준 */
+    //데이터를 구성하고 그 이후, 그 데이터에 맞게 함수를 구성함
+    const duck = {
+        x : 10 , y : 10,
+        moveLeft : function(){this.x -= 1; this.y -= 1;},
+        moveRight : function(){this.x += 1; this.y += 1;},
+    }
+    const dog = {
+        x : 100 , y : 100,
+        moveLeft : function(){this.x -= 1; this.y -= 1;},
+        moveRight : function(){this.x += 1; this.y += 1;},
+    }
+    duck.moveLeft(); console.log(duck);
+    duck.moveRight(); console.log(duck);
+    dog.moveLeft(); console.log(dog);
+    dog.moveRight(); console.log(dog);
+
+    /* 함수기준 */
+    //함수를 구성하고 그 이후, 그 함수에 맞게 데이터를 구성함
+    function moveLeft(obj){
+        return {x : obj.x - 1, y : obj.y - 1};}
+    function moveRight(obj){
+        return {x : obj.x + 1, y : obj.y + 1};}
+
+    console.log(moveLeft(duck), duck);
+    console.log(moveRight(duck), duck);
+    console.log(moveLeft({x:999, y:999}));
+    console.log(moveRight(dog));
+</script>
+
+<pre>
+    함수형 프로그램을 왜? 하냐는 보다는
+    "어떻게" 하느냐에 대해서 많이 설명할것 ㅇㅇ
+    기존 명령형으로 작성한걸 함수형으로 전환하는건 알랴줄것임
+</pre>
+</body>
+</html>

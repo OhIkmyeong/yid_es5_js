@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>0-2. 일급함수, add_maker, 함수로 함수 실행하기</title>
+</head>
+<body>
+<pre>
+
+</pre>
+
+<!-- [스크립트] -->
+<script>
+    /* 일급 함수 */
+    //일급 함수 = 함수를 값으로 다룰 수 있다 = 함수를 변수에 넣을 수 있다. = 함수를 다른 함수에 인자로 넣어줄 수 있다.
+    const f1 = function(a){return a ** a;}
+    console.log(f1(3)); //27
+
+    function add(a = 100){return a + a;}
+    const f2 = add;
+    console.log(f2(3)); //6
+
+    function f3(fn){return fn();}
+    console.log(f3(add)); //200
+
+    /* add_maker : 일급함수 + 클로저 */
+    function add_maker(a){
+        return function(b){
+            return a + b;
+        }
+    }//add_maker
+
+    const add_10 = add_maker(10);
+    console.log(add_10); //f(b){a + b};
+    console.log(add_10(100)); //110
+
+    const add_100 = add_maker(100);
+    console.log(add_100(99)); //199
+
+    /* 예제 02 */
+    function f4(f1,f2,f3){
+        return f3(f1() + f2());
+    }
+
+    const result_f4 = f4(
+        function(){return 2},
+        function(){return 3},
+        function(a){return a * 100;},
+    )
+    console.log(result_f4); //500
+</script>
+</body>
+</html>

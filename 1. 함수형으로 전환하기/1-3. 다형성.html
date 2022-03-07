@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1-3. 다형성</title>
+</head>
+<body>
+<pre>
+    ㅋㅋㄹㅃㅃ map, filter, each는 이미 있다구 JS에
+</pre>
+<script>
+    console.log(
+        [1,2,3,4].map(num => num + 100),
+        [1,2,3,4].filter(num => num % 2 == 0),
+        [1,2,3,4].filter(num => num % 2).map(res => res + 10)
+    );
+
+    //근데 얘네는 정확히 말하면 함수가 아니라 메쏘드임.
+    //순수함수가 아니라, 객체의 상태에 따라 값이 달라진다는 것임.
+    //메써드는 객체지향 프로그램임
+    //메써드는 해당 클래스에 정의되었기 때문에 해당 클래스의 인스턴스에서만 쓸 수 있음. 
+    //map과 filter는 array 아니면 쓸 수 없다 이거야...
+    //array like 객체는 메쏘드 쓸수 없어서 Array.from()으로 쓰는거 떼흥흑;
+    //객체지향의 특징임. 해당 클래스 아닌 객체는 메쏘드 못써잉~!
+    //querySelector All도 Array like 거든
+
+    /* 외부 다형성 */
+    /* 1. array_like, arguments, document.querySelectorAll */
+    const $$dom = document.querySelectorAll('*');
+    console.log($$dom); //[[Prototype]]: NodeList
+    console.log(Array.from($$dom)); //[[Prototype]]: Array(0)
+
+    /* 내부 다형성 */
+    /* 2. predi, iter, mapper */
+    //모든 보조함수를 콜백함수라고 부르지는 말자잉
+    //predi, iter, mapper 등으로 부를 수 있다궁
+    //callback : 모든게 다 끝나고 돌려주는 함수 
+    //predi : 어떤 조건을 리턴
+    //iter : 반복
+    //mapper : 매핑하는거
+
+    function _each(list,iter){
+        for(let i=0; i<list.length; i++){iter(list[i]);}
+        return list;
+    }//_each
+
+    function _map(list,mapper){
+        const result = [];
+        _each(list, function(item){ result.push(mapper(item)); });
+        return result
+    }//_map
+
+    console.log(_map([1,2,3,4], function(item){return item * 5;})); //[5,10,15,20]
+</script>
+</body>
+</html>

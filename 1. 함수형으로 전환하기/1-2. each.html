@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1-2.each</title>
+</head>
+<body>
+<script>
+    const users = [
+        {id:1, name:'Moira', age:48},
+        {id:2, name:'Siebren', age:62},
+        {id:3, name:'Din', age:38},
+        {id:4, name:'Luke', age:28},
+        {id:5, name:'Leia', age:29},
+        {id:6, name:'Han', age:33},
+        {id:7, name:'Grogu', age:50},
+        {id:8, name:'Anakain', age:52},
+    ];
+
+    /* 03. each 만들기 */
+    function _filter(users, predi){
+        const result = [];
+        _each(users, function(val){
+            if(predi(val)){result.push(val)}
+        });
+        return result;
+    }//_filter
+
+    function _map(users, mapper){
+        const result = [];
+        _each(users, function(val){
+            result.push(mapper(val));
+        });
+        return result;
+    }//_map
+
+    function _each(list,func){
+        for(let i=0; i<list.length; i++){func(list[i]);}
+        return list;
+    }//_each
+
+    const over_30 = _map(
+        _filter(users, function(user){return user.age >= 30;}),
+        function(user){return user.name;}
+    );
+
+    console.log(over_30);
+
+    //each가 이해 안가
+    console.log(
+        _each([1,2,3,4], function(val){console.log(val * 100)})
+    );
+    //list는 변하지 않음 왜냐면 _each의 return 값은 넣어준 list 그대로니까
+
+
+</script>
+</body>
+</html>
