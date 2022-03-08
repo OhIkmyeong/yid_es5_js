@@ -8,6 +8,39 @@
 </head>
 <body>
 <script>
+    /* 4. _reduce 만들기 */
+    function _rest(list, num){
+        const _slice = Array.prototype.slice;
+        return _slice.call(list, num ?? 1);
+    }//_rest
+
+    function _reduce(list, iter, memo){
+        //splice는 type을 바꿔버려서..-_-
+        if(arguments.length == 2){
+            memo = list[0];
+            list  = _rest(list)
+        }
+
+        _each(list, function(val){
+            memo = iter(memo, val);
+        });
+        return memo;
+    }//_reduce
+
+    console.log(
+        _reduce([1,2,3,4], add)
+    );
+
+    //add(add(add(0,1),2),3) 이런 걸 실행해준다는 뜻이야.
+    //map이나 filter는 array로 들어온걸 array로 뱉어준다면
+    //reduce는 array로 들어온걸 하나만 들어있는 array로 뱉는다던가 다른 객체로 뱉는다던가...
+
+    function _each(list,fn){
+        for(let i=0; i<list.length; i++){fn(list[i]);}
+        return list
+    }//_each
+
+    function add(a,b){return a + b;}
 </script>
 </body>
 </html>
