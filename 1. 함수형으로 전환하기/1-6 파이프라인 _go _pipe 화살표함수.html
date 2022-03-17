@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1-6 파이프라인 _go _pipe 화살표함수</title>
+</head>
+<body>
+<script>
+    function _rest(list,num){
+        const _slice = Array.prototype.slice;
+        return _slice.call(list,num ?? 1);
+    }//_rest
+
+    function _each(list,func){
+        for(let i=0; i<list.length; i++){ func(list[i]); }
+        return list;
+    }//_each
+    
+    function _reduce(list,iter,memo){
+        if(arguments.length == 2){
+            memo = list[0];
+            list = _rest(list);
+        }
+
+        _each(list, function(val){
+            memo = iter(memo, val);
+        });
+
+        return memo;
+    }//_reduce
+
+    function _filter(list, predi){
+        const result = [];
+        _each(list,function(item){
+            if(predi(item)){result.push(item);}
+        });
+        return result;
+    }//_filter
+
+    function _map(list, mapper){
+        const result = [];
+        _each(list, function(item){
+            result.push(mapper(item));
+        });
+        return result;
+    }//_map
+
+    //5. 파이프라인 만들기
+    //파이프는 함수들을 받아서 그 함수들을 연속적으로 실행해주는 함수를 리턴해주는 함수임.
+    //const f1 = _pipe(function(){}, function(){});
+    //결국 pipe는 reduce인데 pipe의 추상화된 버젼이 reduce란것이야.
+
+    /* 1. _pipe ✨✨✨✨✨*/
+    function _pipe(){
+        const fns = arguments;
+        return function(arg){
+            // console.log(`arg : ${arg}, fns : ${fns}`);
+            return _reduce(fns, function(arg, fn){
+                return fn(arg);
+            }, arg);
+        };
+    }//_pipe
+
+    const f1 = _pipe(
+        function (a){return a + 1},
+        function (a){return a * 2},
+        function (a){return a * a}
+    );
+
+    console.log('_pipe : ',f1(4)); //100
+
+    /* 2. _go ✨✨✨✨✨*/
+    //_go는 파이프함수인데 즉시 실행되는 유형임
+    
+    function _go(arg){
+        const fns = _rest(arguments);
+        _pipe.apply(null, fns)(arg);
+    }//_go
+
+    _go(4,
+    function (a){return a + 1},
+    function (a){return a * 2},
+    function (a){return a * a},
+    console.log);
+
+    /* 3. users에 _go 적용 */
+    const users = [
+        {name:'딘자린',age:48},{name:'그로구',age:50},{name:'루크',age:28},{name:'레아',age:28}
+    ];
+
+    _go(
+        users,
+        function(users){
+            return _filter(users, function(user){return user.age >= 30;})
+        },
+        function(filterd_users){
+            return _map(filterd_users, function(user){return user.name;});
+        },
+        console.log
+    );
+
+    _go(
+        users,
+        function(users){
+            return _filter(users, function(user){return user.age < 30;})
+        },
+        function(filterd_users){
+            return _map(filterd_users, function(user){return user.name;})
+        },
+        console.log
+    );
+
+
+    /* 4. _curryr을 사용하면 더 간결하게 쓸 수 있다. ✨✨✨✨✨ */
+    console.log('---------------------------------------');
+    function _curryr(fn){
+        return function(a,b){
+            return arguments.length == 2 ? fn(a,b) : function(b){return fn(b,a);}
+        }
+    }//_curryr
+    const _get = _curryr(function(obj,key){return obj ? obj[key] : undefined});
+
+    console.log(_get({name:'test'}, 'name'));
+    console.log(_get('name')({name:'test'}));
+
+    const __map = _curryr(_map);
+    const __filter = _curryr(_filter);
+
+    //이거를
+    console.log(
+        _map([1,2,3],val => val * 2)
+    );
+
+    //이렇게 하는 원리
+    console.log(
+        __map(val => val * 2)([1,2,3,4,5])
+    );
+    
+    //결귝 
+    _go(
+        users,
+        __filter(user => user.age < 30),
+        __map(_get('name')),
+        console.log
+    );
+
+    /* 5. 화살표 함수 */
+    /* 
+        이미 알지? ㅇㅇ 생략
+        다만 이건 새롭네. 만일 object를 바로 리턴해주는걸 만들고 싶다면?
+        const fn = (a,b) => ({val : a + b});
+        
+    */
+</script>
+</body>
+</html>

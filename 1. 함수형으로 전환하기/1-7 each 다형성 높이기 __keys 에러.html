@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1-7 each 다형성 높이기 __keys 에러</title>
+</head>
+<body>
+<script>
+    /* 6. each의 외부 다형성 높이기 */
+    function _each_prev(list,iter){
+        for(let i=0; i<list.length; i++){
+            iter(list[i]);
+        }
+    }//_each_prev
+
+    // _each_prev(null, function(val){console.log(val)}); //ERROR!
+    
+
+    /* 6-1. _each에 null 넣어도 에러 안 나게 */
+    function _curryr(fn){
+        return function(a,b){
+            return arguments.length == 2 ? fn(a,b) : function(b){return fn(b,a);}
+        }
+    }//_curryr
+
+    const _get = _curryr(function(obj,key){return obj ? obj[key] : undefined});
+
+    const _length = _get('length');
+    
+    function _each(list,iter){
+        for(let i=0, len = _length(list); i<len; i++){
+            iter(list[i]);
+        }
+        return list;
+    }//_each
+
+    // _each([1,2,3], console.log); 
+    _each(null, console.log); //에러 안 남
+
+    function _map(list,mapper){
+        const result = [];
+        _each(list,function(val){
+            result.push(mapper(val));
+        });
+        return result;
+    }//_map
+
+    console.log(_map([1,2,3],val=> val*2));
+    console.log(_map(null, val=> val*2)); //[]
+
+    /* 6-2. _keys 만들기 */
+    /* 6-3. _keys 에서도 _is_object 인지 검사하여 null 에러 안 나게 */
+    const djarin = {name:"딘자린",age:48, creed:'Mandalorian'};
+    console.log(Object.keys(djarin)); //['name', 'age', 'creed']
+
+    //기존 Object.keys의 단점 : ㅋㅋ Array도 Object라 걍 뽑아버림
+    console.log(Object.keys([100,200,300])); //['0','1','2']
+    console.log(Object.keys('well')); //['0','1','2','3']
+    console.log(Object.keys(1991)); //[]
+    // console.log(Object.keys(null)); //ERROR
+
+    function _keys(obj){
+        return _is_object(obj) ? Object.keys(obj) : [];
+    }//_keys
+
+    function _is_object(obj){
+        return typeof obj == 'object' && !!obj;
+    }//_is_object
+
+
+    console.log(_keys(djarin)); // ['name', 'age', 'creed']
+    console.log(_keys([100,200,300])); //['0','1','2']
+    console.log(_keys('Hello World')); //[];
+    console.log(_keys(1991)); //[];
+    console.log(_keys(null)); //[];
+
+    /* ✨✨✨✨✨✨ 6-4. _each 외부 다형성 높이기 */    
+    function _each(list,iter){
+        let keys = _keys(list);
+        for(let i=0, len = keys.length; i<len; i++){
+            iter(list[keys[i]]);
+        }
+        return list;
+    }//_each
+
+    const sample = {13:'가가가',14:'나나나',15:'다다다',30:'라라라'};
+
+    _each(['ㄱ','ㄴ','ㄷ'], console.log);
+    _each(sample, console.log);
+
+    console.log(_map(sample,val => "내 이름은 " + val));
+
+    /*  */
+    function _rest(list,num){
+        const _slice = Array.prototype.slice;
+        return _slice.call(list,num ?? 1);
+    }//_rest
+
+    function _reduce(list,iter,memo){
+        if(arguments.length == 2){
+            memo = list[0];
+            list = _rest(list);
+        }
+
+        _each(list, function(val){
+            memo = iter(memo, val);
+        });
+
+        return memo;
+    }//_reduce
+
+    function _pipe(){
+        const fns = arguments;
+        return function(arg){
+            // console.log(`arg : ${arg}, fns : ${fns}`);
+            return _reduce(fns, function(arg, fn){
+                return fn(arg);
+            }, arg);
+        };
+    }//_pipe
+
+    function _go(arg){
+        const fns = _rest(arguments);
+        _pipe.apply(null, fns)(arg);
+    }//_go
+
+    function _curryr(fn){
+        return function(a,b){
+            return arguments.length == 2 ? fn(a,b) : function(b){return fn(b,a);}
+        }
+    }//_curryr
+
+    const __map = _curryr(_map);
+
+    _go(
+        sample,
+        function(list){
+            return _map(list, val => val + '-mappered')
+        },
+        console.log);
+    _go(
+        ['001','002','003'],
+        function(list){
+            return _map(list, val => val + '-mappered')
+        },
+        console.log);
+
+
+//형을 굉장히 강하게 체크하면서 프로그래밍 하는 방식도 있지만
+//함수형 프로그래밍은 다형성을 중시해서 어떤 값을 넣더라도 그럴싸한 값을 뱉어낼 수 있게 하는게 목적임.
+</script>
+</body>
+</html>

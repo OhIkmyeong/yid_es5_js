@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>call bind 테스트</title>
+</head>
+<body>
+<script>
+    function show_name_call(){console.log('call',this.name);}
+    function show_name_bind(){console.log('bind',this.name);}
+
+    const mando = {name:"딘자린"};
+
+    
+    show_name_call.call(mando); //call 딘자린
+    const useCall = show_name_call.call(mando); //call 딘자린 //즉시 실행
+    // useCall(); // 이렇게는 못씀 useCall은 function이 아니라고 뜬다!!!!
+
+    //bind는 이렇게 써야됭
+    show_name_bind.bind(mando); // (아무일도 일어나지 않는다)
+    const useBind = show_name_bind.bind(mando);
+    useBind(); //bind 딘자린
+
+</script>
+</body>
+</html>
