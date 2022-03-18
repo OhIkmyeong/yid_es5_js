@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2-3 찾아내기 find find_index some every</title>
+</head>
+<body>
+<script>
+    /* 컬렉션 중심 프로그래밍의 4가지 유형과 함수 */
+    //컬렉션 은 array 같은거...
+    //대표적으로 map, filter, find, reduce
+
+    const users = [
+        {id:10, name:'Din Djarin', age:38},
+        {id:20, name:'Luke Skywalker', age:28},
+        {id:30, name:'Grogu', age:50},
+        {id:40, name:'Kara Dune', age:31},
+        {id:50, name:'Grigg Karga', age:53},
+        {id:60, name:'Boba Fett', age:55},
+        {id:70, name:'Moira O\'Deorain', age:48},
+        {id:80, name:'Siebren De Kuiper', age:62},
+        {id:90, name:'Gabriel Reyes', age:52},
+        {id:100, name:'Rena Oxton', age:26},
+        {id:110, name:'잼민', age:12},
+    ];
+
+    function _is_object(obj){return typeof obj == 'object' && !!obj;}
+    function _keys(obj){return _is_object(obj) ? Object.keys(obj) : [];}
+    function _rest(list,num){
+        const _slice = Array.prototype.slice;
+        return _slice.call(list,num ?? 1);
+    }//_rest
+
+    function _each(list,iter){
+        const keys = _keys(list);
+        for(let i=0, len = keys.length; i<len; i++){
+            iter(list[keys[i]]);
+        }
+        return list;
+    }//_each
+    
+    function _map(list,mapper){
+        const result = [];
+        _each(list,function(item){
+            result.push(mapper(item));
+        });
+        return result;
+    }//_map
+
+    function _filter(list,predi){
+        const result = [];
+
+        _each(list, function(item){
+            if(predi(item)){result.push(item);}
+        });
+
+        return result;
+    }//_filter
+
+    function _reduce(list,iter,memo){
+        if(arguments.length == 2){
+            memo = list[0];
+            list = _rest(list);}
+
+        _each(list, function(val){
+            memo = iter(memo, val);
+        });
+
+        return memo;
+    }//_reduce
+
+    function _curryr(fn){
+        return function(a,b){
+            return arguments.length == 2 ? fn(a,b) : function(b){return fn(b,a);}
+        }
+    }//_curryr
+
+    /* 🚩 1. 수집하기 - map, values, pluck 등 */
+    //1-0. _map
+    //🍑1-1. _values
+    function _values(data){
+        return _map(data, _identity);
+    }//_values
+
+    function _identity(val){return val;}//_identity
+
+    const __map = _curryr(_map);
+    const __values = __map(_identity);
+
+    //🍑1-2. _pluck
+    //_getr로 더 간단하게
+    const _getr = _curryr(function(obj,key){
+        return !obj ? undefined : obj[key];
+    });
+
+    function _pluck(data,key){
+        return _map(data, _getr(key));
+    }//_pluck
+
+    /* 🚩 2. 거르기 - filter, reject, compact, without 등 */
+
+    //🍑 2-1. reject
+    function _reject(data,predi){
+        // return _filter(data, val => !predi(val));
+        return _filter(data, _negate(predi));
+    }//_reject
+
+    //함수를 리턴하는 함수 만들어서 더 간결하게
+    function _negate(func){
+        return function(val){
+            return !func(val);
+        }
+    }//_negate
+    //🍑 2-2. compact
+    function _compact(data){
+        return _filter(data, _identity);
+    }//_compact
+
+    const __filter = _curryr(_filter);
+    const __compact = __filter(_identity);
+    // console.log(__compact([1,2,0,false,{}]));
+
+    //🍑 2-3. without
+
+    /* 🚩 3. 찾아내기 - find, some, every 등 */
+    //🍑3-0. find 만들기
+    function _find(list, predi){
+        const keys = _keys(list);
+        for(let i=0, len = keys.length; i<len; i++){
+            const val = list[keys[i]];
+            if(predi(val)) return val;
+        }
+    }//_find
+    
+    console.log('_find : ', _find(users, obj => obj.age < 30));
+
+    //🍑3-1. find_index
+    function _find_index(list,predi){
+        const keys = _keys(list);
+        for(let i=0, len = keys.length; i<len; i++){
+            const val = list[keys[i]];
+            if(predi(val)) return i;
+        }
+
+        return -1;
+    }//_find_index
+
+    function _get(obj,key){
+        return obj ? obj[key] : undefined;
+    }
+
+    console.log('_find_index : ', _find_index(users, obj => obj.age >= 50));
+    console.log(
+        '_get : ',
+        _get(
+            _find(users, obj => obj.age >= 50)
+            ,'name'
+        )
+    );
+
+    function _pipe(){
+        const fns = arguments;
+        return function(arg){
+            // console.log(`arg : ${arg}, fns : ${fns}`);
+            return _reduce(fns, function(arg, fn){
+                return fn(arg);
+            }, arg);
+        };
+    }//_pipe
+
+    function _go(arg){
+        const fns = _rest(arguments);
+        _pipe.apply(null, fns)(arg);
+    }//_go
+
+    const __find = _curryr(_find);
+
+    _go(
+        users,
+        __find(function(obj){return obj.age < 50}),
+        _getr('name'),
+        result => console.log('_go : ', result)
+    );
+
+    //🍑3-2. some
+    //하나만 true여도 true
+    function _some(data, predi){
+        return _find_index(data,predi || _identity) !== -1;
+    }//_some
+    
+    //🍑3-3. every
+    //하나만 false여도 false                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+    function _every(data, predi){
+        return _find_index(data, _negate(predi || _identity)) == -1;
+    }//_every
+
+    //확인
+    console.log('_some : ',_some([1,2,5,10,30], val => val > 10));
+    console.log('_every : ',_every([1,2,5,10,30], val => val > 10));
+    console.log('_every : ',_every([1,2,5,10,30], val => val > 0));
+
+    //some이랑 every는 뒤에 predi를 안 넣어줘도 동작해야하는데
+    console.log('_some : ',_some([0,1,2])); //true가 나와야함
+    console.log('_some : ',_some([0,null,false])); //false가 나와야함
+    console.log('_every : ',_every([1,2,3])); //true가 나와야함
+    console.log('_every : ',_every([1,2,false])); //false가 나와야함
+
+    //예제
+    console.log(
+        '_some : ', _some(users, user => user.age < 20)
+    );
+
+    /* 🚩 4. 접기(축약) - reduce, min, max, group_by, count_by 등 */
+</script>
+</body>
+</html>

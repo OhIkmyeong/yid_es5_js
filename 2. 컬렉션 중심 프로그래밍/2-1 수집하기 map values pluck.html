@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2-1 수집하기 map values pluck</title>
+</head>
+<body>
+<script>
+    /* 컬렉션 중심 프로그래밍의 4가지 유형과 함수 */
+    //컬렉션 은 array 같은거...
+    //대표적으로 map, filter, find, reduce
+
+    const users = [
+        {id:10, name:'Din Djarin', age:38},
+        {id:20, name:'Luke Skywalker', age:28},
+        {id:30, name:'Grogu', age:50},
+        {id:40, name:'Kara Dune', age:31},
+        {id:50, name:'Grigg Karga', age:53},
+        {id:60, name:'Boba Fett', age:55},
+        {id:70, name:'Moira O\'Deorain', age:48},
+        {id:80, name:'Siebren De Kuiper', age:62},
+        {id:90, name:'Gabriel Reyes', age:52},
+        {id:100, name:'Rena Oxton', age:26},
+        {id:110, name:'잼민', age:12},
+    ];
+
+    function _is_object(obj){return typeof obj == 'object' && !!obj;}
+    function _keys(obj){return _is_object(obj) ? Object.keys(obj) : [];}
+    function _rest(list,num){
+        const _slice = Array.prototype.slice;
+        return _slice.call(list,num ?? 1);
+    }//_rest
+
+    function _each(list,iter){
+        const keys = _keys(list);
+        for(let i=0, len = keys.length; i<len; i++){
+            iter(list[keys[i]]);
+        }
+        return list;
+    }//_each
+    
+    function _map(list,mapper){
+        const result = [];
+        _each(list,function(item){
+            result.push(mapper(item));
+        });
+        return result;
+    }//_map
+
+    function _filter(list,predi){
+        const result = [];
+
+        _each(list, function(item){
+            if(predi(item)){result.push(item);}
+        });
+
+        return result;
+    }//_filter
+
+    function _reduce(list,iter,memo){
+        if(arguments.length == 2){
+            memo = list[0];
+            list = _rest(list);}
+
+        _each(list, function(val){
+            memo = iter(memo, val);
+        });
+
+        return memo;
+    }//_reduce
+
+    function _curryr(fn){
+        return function(a,b){
+            return arguments.length == 2 ? fn(a,b) : function(b){return fn(b,a);}
+        }
+    }//_curryr
+
+    /* 🚩 1. 수집하기 - map, values, pluck 등 */
+    //1-0. _map
+    console.log('_map : ',_map(users, user => user.name));
+
+    //🍑1-1. _values
+    function _values(data){
+        return _map(data, _identity);
+    }//_values
+
+    console.log('_keys : ',_keys(users[0]));
+    console.log('_values : ', _values(users[0]));
+
+    //values는 identity란 함수를 합성해서 쓸 수도 있다.
+    //이걸 와 쓰는것임..?ㅋㅋ
+    function _identity(val){return val;}//_identity
+
+    //curryr 로 더 간단하게 만들 수도 있음
+    const __map = _curryr(_map);
+    const __values = __map(_identity);
+    console.log('__values : ',__values(users[1]));
+
+    //🍑1-2. _pluck
+    function _pluck(data, key){
+        return _map(data, obj=>obj[key]);
+    }//_pluck
+
+    console.log('_pluck : ',_pluck(users, 'age'));
+
+    //_getr로 더 간단하게
+    const _getr = _curryr(function(obj,key){
+        return !obj ? undefined : obj[key];
+    });
+
+    function __pluck(data,key){
+        return _map(data, _getr(key));
+    }//__pluck
+
+    console.log('__pluck : ', __pluck(users, 'name'));
+
+    /* 🚩 2. 거르기 - filter, reject, compact, without 등 */
+    /* 🚩 3. 찾아내기 - find, some, every 등 */
+    /* 🚩 4. 접기(축약) - reduce, min, max, group_by, count_by 등 */
+</script>
+</body>
+</html>
