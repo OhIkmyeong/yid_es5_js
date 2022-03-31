@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3-0.지연평가</title>
+</head>
+<body>
+<script src="./../partial.js"></script>
+<script>
+    /* 🍑 지연 평가를 시작시키고, 유지시키는(이어가는) 함수 */
+    /* 0-0. ✨ map */
+    /* 0-1. ✨ filter, reject */
+
+    //2:24
+    let start_map = 0;
+    let start_filter = 0;
+    _.go(
+        _.range(100),
+        _.map(val => {
+            start_map++;
+            return val * val;
+        }),
+        _.filter(val => {
+            start_map++;
+            start_filter++;
+            return val % 2}),
+        _.take(5),
+        console.log
+    );
+    console.log('map의 지연 평가 : ',start_map); //200
+    console.log('filter의 지연 평가 : ',start_filter); //100
+
+    //5:30 언더바를 L로 바꾸면 지연평가 쌉가능
+    let mi=0; let fi=0;
+    _.go(
+        _.range(100),
+        L.map(val => {
+            mi++;
+            return val * val;
+        }),
+        L.filter(val => {
+            mi++;
+            fi++;
+            return val % 2}),
+        L.take(5),
+        console.log
+    );
+
+    console.log('map의 지연 평가 : ',mi); //20
+    console.log('filter의 지연 평가 : ',fi); //10
+
+
+    /* 🍑 끝을 내는 함수 */
+    /* 1-0. ⚡ take */
+    /* 1-1. ⚡ some, every, fine */
+</script>
+</body>
+</html>

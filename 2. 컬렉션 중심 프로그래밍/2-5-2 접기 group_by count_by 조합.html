@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2-5 접기 group_by count_by 조합</title>
+    <title>2-5-2 접기 group_by count_by 조합</title>
 </head>
 <body>
 <script>
@@ -108,6 +108,8 @@
         // return _filter(data, val => !predi(val));
         return _filter(data, _negate(predi));
     }//_reject
+
+    const __reject = _curryr(_reject);
 
     //함수를 리턴하는 함수 만들어서 더 간결하게
     function _negate(func){
@@ -233,34 +235,9 @@
         (obj[key] = obj[key] || []).push(val);
         return obj;
     }
-
-    console.log(
-        _group_by(
-            users,
-            function(user){return user.age}
-        )
-    );
-    
-    _go(
-        users,
-        _group_by(user => user.age - user.age % 10),
-        console.log
-    );
     
     // 이름 첫글자로 
     function _head(list){return list[0];}
-
-    _go(
-        users,
-        _group_by(user => user.name[0]),
-        console.log
-    );
-
-    _go(
-        users,
-        _group_by(_pipe(_getr('name'), _head)),
-        console.log
-    );
 
     //🍑4-3. count_by, inc
     const _count_by = _curryr(function(data,iter){
@@ -277,22 +254,70 @@
         return count;
     }//_inc
 
-    _go(
-        users,
-        _count_by(_pipe(_getr('name'), _head)),
-        console.log
-    );
-
-    _go(
-        users,
-        _count_by(user => user.age - user.age % 10),
-        console.log
-    );
 
     //18:36
     /* 실무적인 예제 만들기 */
     //_each와 _map함수를 약간만 고치고 써보자
+    function _each2(list,iter){
+        const keys = _keys(list);
+        for(let i=0, len = keys.length; i<len; i++){
+            iter(list[keys[i]],keys[i]);
+        }
+        return list;
+    }
 
+    function _map2(list,mapper){
+        const new_list = [];
+        _each2(list, function(val,key){
+            new_list.push(mapper(val, key));
+        });
+        return new_list;
+    }//_map2
+
+    // _map2([10,20,30],console.log); //10 '0', 20 '1', 30 '2';
+    _map2(users[0],console.log); //10 'id' //Din Djarin name //38 'age'
+    const like_pairs = _map2(users[0], function(val,key){
+        //_pairs와 동일한 기능 수행
+        return [key, val];
+    });
+    console.log('like _pairs : ', like_pairs);
+
+    //그럼 _pairs를 구현하면 되겠네
+    const __map2 = _curryr(_map2);
+    const __pairs = __map2((val,key)=>[key,val]);
+    console.log('__pairs', __pairs(users[1]));
+
+    /* 22:00 */
+    _go(
+        users,
+        __reject(user => user.age < 20),
+        _count_by(user=>{return user.age - user.age % 10}),
+        __map2((count,key)=>`<li>${key}대는 ${count}명 입니다.</li>`),
+        list => `<ul> ${list.join(' ')} </ul>`,
+        result => document.write(result)
+    );
+
+    const test_pipe = _pipe(
+        _count_by(user=>{return user.age - user.age % 10}),
+        __map2((count,key)=>`<li>${key}대는 ${count}명 입니다.</li>`),
+        list => `<ul> ${list.join(' ')} </ul>`,
+        result => {
+            console.log('test_pipe : ', result);
+        }
+    );
+
+    test_pipe(users);
+
+    const test_pipe_2 = _pipe(
+        __reject(user => user.age > 20),
+        test_pipe
+    );
+
+    test_pipe_2(users);
+
+    //함수형 프로그래밍의 장점
+    //문제의 분석과 접근이 쉽다.
+    
 </script>
 </body>
 </html>
