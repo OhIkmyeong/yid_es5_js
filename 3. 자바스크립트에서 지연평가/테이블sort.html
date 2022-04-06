@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>table sort</title>
+    <style>
+        table{border-spacing:0;border-collapse:separate;}
+        th,td{border:1px solid #000; padding:1em 2em;}
+        thead th{background:#eee; cursor:pointer;}
+    </style>
+</head>
+
+<body>
+    <h1>뜬금무 table sort</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th data-sort="name">이름</th>
+                <th data-sort="age">나이</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th>모이라 오디오런</th>
+                <td>48</td>
+            </tr>
+            <tr>
+                <th>Din Djarin</th>
+                <td>38</td>
+            </tr>
+            <tr>
+                <th>Luke Skywalker</th>
+                <td>28</td>
+            </tr>
+            <tr>
+                <th>Moira O'Deorain</th>
+                <td>48</td>
+            </tr>
+            <tr>
+                <th>Siebren De Kuiper</th>
+                <td>62</td>
+            </tr>
+            <tr>
+                <th>Jamison Fawkes</th>
+                <td>25</td>
+            </tr>
+            <tr>
+                <th>시브런 드 카위퍼</th>
+                <td>62</td>
+            </tr>
+            <tr>
+                <th>다다다다다다다</th>
+                <td>11111</td>
+            </tr>
+            <tr>
+                <th>가가가가</th>
+                <td>99999</td>
+            </tr>
+            <tr>
+                <th>나나</th>
+                <td>3333</td>
+            </tr>
+            <tr>
+                <th>aaaa</th>
+                <td>11111</td>
+            </tr>
+            <tr>
+                <th>Aaaa</th>
+                <td>99999</td>
+            </tr>
+            <tr>
+                <th>bbbb</th>
+                <td>3333</td>
+            </tr>
+        </tbody>
+    </table>
+    <script>
+        window.addEventListener('click', e => {
+            if (e.target.dataset.sort) { table_sort(e.target); }
+        });
+
+        function table_sort(target) {
+            const $tbody = target.parentElement.parentElement.nextElementSibling;
+            for(let i=0; i<$tbody.children.length; i++){
+                sort_func(target);
+            }
+        }//table_sort
+
+        function sort_func(target) {
+            const cidx = target.cellIndex;
+            const $tbody = target.parentElement.parentElement.nextElementSibling;
+            for (let i = 0; i < $tbody.children.length - 1; i++) {
+                const $curr = $tbody.children[i].children[cidx];
+                const $next = $tbody.children[i + 1].children[cidx];
+                let val_curr = $curr.innerText;
+                let val_next = $next.innerText;
+                let predi;
+                switch(target.dataset.sort){
+                    case "name" :
+                        val_curr = val_curr[0].toLowerCase();
+                        val_next = val_next[0].toLowerCase();
+                        break;
+                        
+                    case "age" :
+                        val_curr = parseInt(val_curr);
+                        val_next = parseInt(val_next);
+                        break;
+                }
+                if (val_curr > val_next) {
+                    $tbody.insertBefore($curr.parentElement, $next.parentElement.nextElementSibling);
+                }
+            }//for-i
+        }//sort_func
+    </script>
+</body>
+
+</html>

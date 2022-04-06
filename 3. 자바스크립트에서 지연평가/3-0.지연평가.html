@@ -29,8 +29,8 @@
         _.take(5),
         console.log
     );
-    console.log('map의 지연 평가 : ',start_map); //200
-    console.log('filter의 지연 평가 : ',start_filter); //100
+    console.log('map의 평가 : ',start_map); //200
+    console.log('filter의 평가 : ',start_filter); //100
 
     //5:30 언더바를 L로 바꾸면 지연평가 쌉가능
     let mi=0; let fi=0;
@@ -50,6 +50,9 @@
 
     console.log('map의 지연 평가 : ',mi); //20
     console.log('filter의 지연 평가 : ',fi); //10
+
+    //다섯개가 모일만큼만 map에서 한번 돌리고 filter에 바로 넣어서 평가하고 take에 추가하고 그래서 최적화된거임
+    //8:50
 
 
     /* 🍑 끝을 내는 함수 */
