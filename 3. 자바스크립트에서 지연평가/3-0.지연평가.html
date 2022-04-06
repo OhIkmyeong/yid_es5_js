@@ -5,15 +5,16 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3-0.지연평가</title>
+    <script src="./../partial.js"></script>
 </head>
 <body>
-<script src="./../partial.js"></script>
 <script>
     /* 🍑 지연 평가를 시작시키고, 유지시키는(이어가는) 함수 */
     /* 0-0. ✨ map */
     /* 0-1. ✨ filter, reject */
 
     //2:24
+    /* 엄격한 평가 */
     let start_map = 0;
     let start_filter = 0;
     _.go(
@@ -52,12 +53,31 @@
     console.log('filter의 지연 평가 : ',fi); //10
 
     //다섯개가 모일만큼만 map에서 한번 돌리고 filter에 바로 넣어서 평가하고 take에 추가하고 그래서 최적화된거임
-    //8:50
+    //8:50 //엄격한 평가에 대하여
+    /* > > > > >
+       > > > > > */
+
+    //10:20 //지연평가에 대하여
+    /* 일단 한번 실행해보고 > 로 가는게 아니라 바로 다음 함수로 ↓ 넣어봄 */
 
 
     /* 🍑 끝을 내는 함수 */
     /* 1-0. ⚡ take */
     /* 1-1. ⚡ some, every, fine */
+    let si=0;
+    _.go(
+        _.range(100),
+        L.map(val => {
+            si++;
+            return val * val;
+        }),
+        L.filter(val => {
+            si++;
+            return val % 2}),
+        L.every(function(val){return val < 10}),
+        console.log
+    );
+    console.log('every의 지연평가',si);
 </script>
 </body>
 </html>
