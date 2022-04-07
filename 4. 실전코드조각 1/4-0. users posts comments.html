@@ -24,20 +24,20 @@
         {id:202, body:'제다이 맞는데요', user_id:102},
         {id:203, body:'새로운 스킨은 안 나오나요?', user_id:103},
         {id:204, body:'나온지 1년이 넘었는데 상호대사가 아직도 적어요', user_id:104},
-        {id:205, body:'PPoWab Mue???? Patu', user_id:105},
+        {id:205, body:'This is the way', user_id:101},
     ];
 
     const comments = [
-        {id:301, body:'PPowab!!!!! ', user_id:105, post_id:201},
+        {id:301, body:'PPowab!!!!! 애비가 나를 베스카에 팔았다', user_id:105, post_id:201},
         {id:302, body:'베스카가 무엇인가', user_id:104, post_id:201},
         {id:303, body:'제다이가 무엇인가', user_id:104, post_id:202},
         {id:304, body:'Ppatu..?', user_id:105, post_id:203},
         {id:305, body:'덧글이다. 이것은(1)', user_id:106, post_id:203},
         {id:306, body:'덧글이다. 이것은(2)', user_id:106, post_id:204},
-        {id:307, body:'그로구 수업에 집중해라', user_id:102, post_id:205},
+        {id:307, body:'I am Jedi, Like my Father was', user_id:102, post_id:205},
         {id:308, body:'대충 모이라의 대사(1)', user_id:103, post_id:204},
         {id:309, body:'대충 모이라의 대사(2)', user_id:103, post_id:202},
-        {id:310, body:'Mue....', user_id:105, post_id:201},
+        {id:310, body:'Mue....압빠가 베스케이 나를 팔았다', user_id:105, post_id:201},
     ];
 
     /****
@@ -54,13 +54,145 @@
       */
 
     //  * 1. 특정인의 posts의 모든 comments 거르기 3:40
-    _.filter(
-        posts
-        ,console.log
+    // console.log(
+    //     _.filter(
+    //         posts,
+    //         post => post.user_id == 101
+    //     )
+    // );
+    console.log('(1)')
+    _.go(
+        _.filter(posts, post => post.user_id==102),
+        function(fPosts){
+            return _.filter(comments, comment => {
+                return _.find(fPosts, obj => obj.id == comment.post_id);
+            });
+        },
+        console.log
     );
+
+    console.log('(1-2) 좀 더 간단하게')
+
+    _.go(
+        posts,
+        _.filter(post => post.user_id==101),
+        _.map(post => post.id),
+        postIds => {
+            return _.filter(comments, comment=> {
+                return _.contains(postIds, comment.post_id);
+            });
+        },
+        console.log
+    );
+
+    console.log('(1-3) map을 pluck으로 대체')
+
+    _.go(
+        posts,
+        _.filter(post => post.user_id==101),
+        _.pluck('id'),
+        postIds => {
+            return _.filter(comments, comment=> {
+                return _.contains(postIds, comment.post_id);
+            });
+        },
+        console.log
+    );
+
+    console.log('(1-4) filter를 where로 대체')
+
+    _.go(
+        posts,
+        _.where({user_id:101}),
+        _.pluck('id'),
+        postIds => {
+            return _.filter(comments, comment=> {
+                return _.contains(postIds, comment.post_id);
+            });
+        },
+        console.log
+    );
+
+    
     //  * 2. 특정인의 posts에 comments를 단 친구의 이름들 뽑기
+    console.log('(2)')
+
+    _.go(
+        posts,
+        _.where({user_id:101}),
+        _.pluck('id'),
+        postIds => {
+            return _.filter(comments, comment=> {
+                return _.contains(postIds, comment.post_id);
+            });
+        },
+        _.map(comment => _.find(users, user=> user.id == comment.user_id).name ),
+        _.uniq,
+        console.log
+    );
+
+    console.log('이제 중복을 제거해보자...근데 굳이');
+
+    function post_by(attr){
+        return _.where(posts,attr)
+    }//post_by
+
+    _.go(
+        {user_id:101},
+        post_by,
+        _.pluck('id'),
+        postIds => {
+            return _.filter(comments, comment=> {
+                return _.contains(postIds, comment.post_id);
+            });
+        },
+        _.map(comment => _.find(users, user=> user.id == comment.user_id).name ),
+        _.uniq,
+        console.log
+    );
+
+    console.log('pipe를 사용하여 중복을 제거해보자');
+
+    const comments_by_posts = _.pipe(
+        _.pluck('id'),
+        postIds => {
+            return _.filter(comments, comment=> {
+                return _.contains(postIds, comment.post_id);
+            });
+        }
+    );//comments_by_posts
+
+    _.go(
+        {user_id:101},
+        post_by,
+        comments_by_posts,
+        console.log
+    );
+
     //  * 3. 특정인의 posts에 comments를 단 친구들 카운트 정보
+    console.log('(3)');
+
+    const f1 = _.pipe(post_by, comments_by_posts);
+
+    _.go(
+        {user_id:101},
+        f1,
+        _.map(comment => {
+            return _.find(users, user => user.id == comment.user_id).name;
+        }),
+        _.count_by,
+        console.log
+    );
     //  * 4. 특정인이 comment를 단 posts 거르기
+    console.log('(4)특정인의 comment 다 거르기');
+
+    _.go(
+        _.where(comments, {user_id:105}),
+        _.pluck('post_id'),
+        _.unique,
+        (postIds)=>_.filter(posts, post=>_.contains(postIds, post.id)),
+        console.log
+    );
     //  * 5. users + posts + comments (index_by와 group_by로 효율 높이기)
     //  * 5.1. 특정인의 posts의 모든 comments 거르기
     //  * 5.2. 특정인의 posts에 comments를 단 친구의 이름들 뽑기
