@@ -63,19 +63,94 @@
 
     //  * 5. users + posts + comments (index_by와 group_by로 효율 높이기)
     /* 좀 더 효율적으로 하기 위해 데이터를 미리 변형해야겠다는 생각 */
-    //6:20
-    const comments2 = _.map(
+    const users2 = _.index_by(users, 'id');
+
+    function find_user_by_id(user_id){
+        return users2[user_id];
+    }//find_user_by_id
+    
+    const comments2 = _.go(
         comments,
-        comment => {
+        _.map(comment => {
             return _.extend({
-                user : {}
+                user : find_user_by_id(comment.user_id)
             }, comment)
-        });
-    console.log(comments2);
+        }),
+        _.group_by('post_id')
+    );
+
+    const posts2 = _.map(
+        posts,
+        post => {
+            return _.extend(
+                { 
+                    comments : comments2[post.id] || [],
+                    user : users2[post.user_id] 
+                }
+            , post);
+        }
+    );
+
+    const posts3 = _.group_by(posts2, 'user_id');
+
+    // console.log(posts2);
+
+    const user3 = _.map(users2, user => {
+        return _.extend({
+            posts : _.filter(posts2, post => post.user_id == user.id)
+        }, user);
+    });
+
+    console.log(user3);
     //  * 5.1. 특정인의 posts의 모든 comments 거르기
+    const dindjarin = user3[0];
+    _.go(
+        dindjarin.posts,
+        _.pluck('comments'),
+        _.flatten,
+        console.log
+    );
+    
+    console.log('더 간결하겐', _.deep_pluck(dindjarin, 'posts.comments'));
+    
     //  * 5.2. 특정인의 posts에 comments를 단 친구의 이름들 뽑기
+    _.go(
+        dindjarin.posts,
+        _.pluck('comments'),
+        _.flatten,
+        _.pluck('user'),
+        _.pluck('name'),
+        _.unique,
+        console.log
+    )
+
+    _.go(
+        dindjarin,
+        _.deep_pluck( 'posts.comments.user.name'),
+        _.unique,
+        console.log
+    );
     //  * 5.3. 특정인의 posts에 comments를 단 친구들 카운트 정보
+    _.go(
+        dindjarin.posts,
+        _.pluck('comments'),
+        _.flatten,
+        _.pluck('user'),
+        _.pluck('name'),
+        _.count_by,
+        console.log
+    )
+
+    _.go(
+        dindjarin,
+        _.deep_pluck( 'posts.comments.user.name'),
+        _.count_by,
+        console.log
+    );
     //  * 5.4. 특정인이 comment를 단 posts 거르기
+    console.log(
+        _.filter(posts2, post => {return _.find(post.comments, comment => comment.user_id == 105)})
+    );
 </script>
 </body>
 </html>
