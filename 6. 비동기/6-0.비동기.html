@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>6-0.비동기</title>
+    <script src="./../partial.js"></script>
+</head>
+<body>
+    비동기 상황에서 함수형 프로그래밍 사례
+<script>
+    function square(a){
+        return new Promise(res=>{
+            setTimeout(()=>{
+                res(a * a);
+            },500);
+        });
+    }//square
+
+    console.log(1);
+    square(10).then(res=>{
+        console.log(2);
+        console.log(res);
+    }).then(()=>{
+        console.log(3);
+    });
+
+    square(2)
+    .then(square)
+    .then(square)
+    .then(square)
+    .then(console.log);
+
+    _.go(
+        square(10),
+        square,
+        res => console.log('_.go : ', res)
+    )
+
+    //_.go의 장점: square가 promise든 아니든 상관없이 잘 동작한다는 거지.
+</script>
+<script>
+    const list = [2,3,4];
+
+    //명령형 프로그램 방식으로 작성
+    new Promise((resolve)=>{
+        (function recur(res){
+            if(list.length == res.length){return resolve(res);}
+
+            square(list[res.length])
+            .then(val => {
+                res.push(val)
+                recur(res);
+            });
+
+        })([]);
+    }).then(res => console.log('명령형 :',res));
+
+    //함수형으로 작성
+    _.go(list,
+    _.map(square),
+    res=>console.log('함수형',res));
+</script>
+</body>
+</html>
